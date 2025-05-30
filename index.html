@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Waste Classifier</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f4f8;
+    }
+    #video {
+      border-radius: 10px;
+      margin: 20px auto;
+    }
+    #result {
+      font-size: 1.5em;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>♻️ Smart Waste Classifier</h1>
+  <video id="video" width="300" height="225" autoplay></video>
+  <br>
+  <button onclick="classifyImage()">Classify Waste</button>
+  <p id="result">Awaiting classification...</p>
+
+  <script>
+    const video = document.getElementById('video');
+    let model;
+
+    // Load model
+    async function loadModel() {
+      model = await mobilenet.load();
+      console.log("Model loaded.");
+    }
+
+    // Start webcam
+    async function startCamera() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+    }
+
+    // Classify image from webcam
+    async function classifyImage() {
+      const prediction = await model.classify(video);
+      const result = prediction[0].className;
+
+      // Simple mapping to waste types
+      let category = "Unknown";
+      if (result.includes("plastic") || result.includes("bottle")) {
+        category = "Recyclable Plastic";
+      } else if (result.includes("banana") || result.includes("apple") || result.includes("food")) {
+        category = "Compostable";
+      } else if (result.includes("paper") || result.includes("book")) {
+        category = "Recyclable Paper";
+      } else if (result.includes("metal") || result.includes("can")) {
+        category = "Recyclable Metal";
+      } else if (result.includes("shoe") || result.includes("bag")) {
+        category = "Landfill";
+      }
+
+      document.getElementById("result").innerText = `Detected: ${result} → Category: ${category}`;
+    }
+
+    loadModel();
+    startCamera();
+  </script>
+</body>
+</html>
+<script src="script.js"></script>
+<body>
+  <div class="container">
+    <h1>♻️ Smart Waste Classifier</h1>
+    <video id="video" autoplay></video>
+    <br>
+    <button onclick="classifyImage()">Classify Waste</button>
+    <p id="result">Awaiting classification...</p>
+  </div>
+</body>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
